@@ -3,12 +3,12 @@ import { ActionFormData, ModalFormData, MessageFormData } from "@minecraft/serve
 
 // main shop
 
-export function main(player) {
+export function shopMain(player) {
     const form = new ActionFormData()
         .title('SHOP')
         .body('購入するアイテムのジャンルを選択します')
         .button('§l武器', 'textures/items/diamond_sword')
-        .button('§lその他', 'textures/items/golden_apple')
+        .button('§lその他', 'textures/blocks/tnt')
         .show(player).then((response) => {
           if (response.selection == 0) {
             weapon(player)
@@ -113,7 +113,7 @@ export function permission(player) {
     .title('権限管理UI')
     .dropdown('プレイヤーの名前を選択してください。undefindを選択した場合無効になります', 
     players, 0)
-    .toggle('よび', true) //1
+    .toggle('備考欄', true) //1
     .toggle('正しいチャットの送信を許可するか', true) //2
     .toggle('ブロックの破壊を許可するか', true) //3
     .toggle('ブロックの設置を許可するか', true) //4
@@ -126,22 +126,19 @@ export function permission(player) {
     .toggle('ニックネーム変更を使用する§r', false) //10
     .toggle('これらは開発者向けの設定です\nデバッグ画面を表示する') //11
     .toggle('権限変更を当事者に通知するか', true) //12
-    const response = form.show(player)
     .show(player).then((formData) => {
-      if (response.canceled && response.cancelationReason === "UserBusy") {
-        permission(player);
+      if (formData.cancelationReason === "UserBusy") {
+          permission(player)
     }
       if (formData.formValues[2] == false) {
-        player.sendMessage(players[formData.formValues[0]].nameTag)
         player.runCommand('tag '+ players[formData.formValues[0]] + ' add perm:sendChat')
       }else {
-        player.sendMessage(players[formData.formValues[0]].nameTag)
         player.runCommand('tag '+ players[formData.formValues[0]] + ' remove perm:sendChat')
       }
-      if (formData.formValues[3] == false) {
-        player.runCommand('tag '+ players[formData.formValues[0]] + ' add perm:breakBlock')
-      }else {
+      if (formData.formValues[3] == true) {
         player.runCommand('tag '+ players[formData.formValues[0]] + ' remove perm:breakBlock')
+      }else {
+        player.runCommand('tag '+ players[formData.formValues[0]] + ' add perm:breakBlock')
       }
       if (formData.formValues[4] == false) {
         player.runCommand('tag '+ players[formData.formValues[0]] + ' add perm:placeBlock')
@@ -175,7 +172,7 @@ export function permission(player) {
 
       if (formData.formValues[12] == true) {
         player.runCommand('tellraw '+ players[formData.formValues[0]] + 
-        '{"rawtext":[{"text":"§cあなたは権限が変更されました§r\n開発者向けメッセージ\n' + 
+        ' {"rawtext":[{"text":"§cあなたは権限が変更されました§r\n開発者向けメッセージ\n' + 
         `${JSON.stringify(formData.formValues, undefined, 2)}` + '\n' + uiResult + '"}]}')
       }
       if (formData.formValues[11] == false) {
